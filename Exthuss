@@ -1,0 +1,264 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+local Player = Players.LocalPlayer
+
+-- GUI
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "EXTHub"
+Gui.ResetOnSpawn = false
+Gui.Parent = Player:WaitForChild("PlayerGui")
+
+-- MAIN FRAME
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0,320,0,260)
+Frame.Position = UDim2.new(0.35,0,0.25,0)
+Frame.BackgroundColor3 = Color3.fromRGB(10,10,10)
+Frame.BorderSizePixel = 0
+Frame.Parent = Gui
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0,12)
+Corner.Parent = Frame
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.fromRGB(255,255,255)
+Stroke.Thickness = 1.5
+Stroke.Parent = Frame
+
+-- TITLE
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1,0,0,40)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBlack
+Title.Text = "EXT HUB"
+Title.TextSize = 24
+Title.TextColor3 = Color3.new(1,1,1)
+Title.Parent = Frame
+
+-- DIVIDER
+local Line = Instance.new("Frame")
+Line.Size = UDim2.new(0.9,0,0,1)
+Line.Position = UDim2.new(0.05,0,0,40)
+Line.BackgroundColor3 = Color3.new(1,1,1)
+Line.BorderSizePixel = 0
+Line.Parent = Frame
+
+-- BUTTON CREATOR
+local function CreateButton(text,y)
+	local Btn = Instance.new("TextButton")
+	Btn.Size = UDim2.new(0.9,0,0,40)
+	Btn.Position = UDim2.new(0.05,0,0,y)
+	Btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	Btn.TextColor3 = Color3.new(1,1,1)
+	Btn.Font = Enum.Font.GothamBold
+	Btn.TextSize = 16
+	Btn.Text = text
+	Btn.Parent = Frame
+
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0,8)
+	Corner.Parent = Btn
+
+	local Stroke = Instance.new("UIStroke")
+	Stroke.Color = Color3.new(1,1,1)
+	Stroke.Parent = Btn
+
+	Btn.MouseEnter:Connect(function()
+		Btn.BackgroundColor3 = Color3.fromRGB(55,55,55)
+	end)
+
+	Btn.MouseLeave:Connect(function()
+		Btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	end)
+
+	return Btn
+end
+
+local FPS = CreateButton("ULTRA FPS MODE [F]",55)
+local TP = CreateButton("TELEPORT [X]",105)
+local SpeedBtn = CreateButton("CFRAME SPEED [Z] : OFF",155)
+
+-- STATUS
+local Status = Instance.new("TextLabel")
+Status.Size = UDim2.new(0.9,0,0,20)
+Status.Position = UDim2.new(0.05,0,0,205)
+Status.BackgroundTransparency = 1
+Status.Font = Enum.Font.GothamBold
+Status.TextSize = 14
+Status.TextColor3 = Color3.new(1,1,1)
+Status.Text = "STATUS : READY"
+Status.Parent = Frame
+
+-- KEYBINDS
+local Keybinds = Instance.new("TextLabel")
+Keybinds.Size = UDim2.new(1,0,0,35)
+Keybinds.Position = UDim2.new(0,0,1,-35)
+Keybinds.BackgroundTransparency = 1
+Keybinds.Font = Enum.Font.Gotham
+Keybinds.TextSize = 12
+Keybinds.TextColor3 = Color3.fromRGB(200,200,200)
+Keybinds.Text = "F = FPS | Z = SPEED | X = TP | RightShift = Hide"
+Keybinds.Parent = Frame
+
+--------------------------------------------------
+-- FPS BOOST
+--------------------------------------------------
+
+local function OptimizeFPS()
+	for _,v in pairs(workspace:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.Material = Enum.Material.SmoothPlastic
+			v.Reflectance = 0
+			v.CastShadow = false
+		elseif v:IsA("Decal") or v:IsA("Texture") then
+			v:Destroy()
+		elseif v:IsA("ParticleEmitter") then
+			v.Enabled = false
+		elseif v:IsA("Trail") then
+			v.Enabled = false
+		elseif v:IsA("Smoke") then
+			v.Enabled = false
+		elseif v:IsA("Fire") then
+			v.Enabled = false
+		elseif v:IsA("Sparkles") then
+			v.Enabled = false
+		elseif v:IsA("Explosion") then
+			v.BlastPressure = 0
+		end
+	end
+
+	Lighting.GlobalShadows = false
+	Lighting.Brightness = 1
+	Lighting.FogEnd = 100000
+	Lighting.EnvironmentDiffuseScale = 0
+	Lighting.EnvironmentSpecularScale = 0
+
+	pcall(function()
+		settings().Rendering.QualityLevel =
+			Enum.QualityLevel.Level01
+	end)
+
+	Status.Text = "STATUS : ULTRA FPS ENABLED"
+end
+
+FPS.MouseButton1Click:Connect(OptimizeFPS)
+
+--------------------------------------------------
+-- TELEPORT
+--------------------------------------------------
+
+local function Teleport()
+	local Character = Player.Character
+
+	if Character and Character:FindFirstChild("HumanoidRootPart") then
+		Character.HumanoidRootPart.CFrame =
+			CFrame.new(170.62,20.60,16.26)
+
+		Status.Text = "STATUS : TELEPORTED"
+	end
+end
+
+TP.MouseButton1Click:Connect(Teleport)
+
+--------------------------------------------------
+-- CFRAME SPEED
+--------------------------------------------------
+
+local SpeedEnabled = false
+
+local function ToggleSpeed()
+	SpeedEnabled = not SpeedEnabled
+
+	SpeedBtn.Text = SpeedEnabled
+		and "CFRAME SPEED [Z] : ON"
+		or "CFRAME SPEED [Z] : OFF"
+
+	Status.Text = SpeedEnabled
+		and "STATUS : SPEED ENABLED"
+		or "STATUS : SPEED DISABLED"
+end
+
+SpeedBtn.MouseButton1Click:Connect(ToggleSpeed)
+
+RunService.RenderStepped:Connect(function()
+	if SpeedEnabled then
+		local Character = Player.Character
+
+		if Character and Character:FindFirstChild("HumanoidRootPart") then
+			local Humanoid =
+				Character:FindFirstChildOfClass("Humanoid")
+
+			if Humanoid then
+				Character.HumanoidRootPart.CFrame =
+					Character.HumanoidRootPart.CFrame +
+					(Humanoid.MoveDirection * 2)
+			end
+		end
+	end
+end)
+
+--------------------------------------------------
+-- KEYBINDS
+--------------------------------------------------
+
+UIS.InputBegan:Connect(function(Input, GPE)
+	if GPE then return end
+
+	if Input.KeyCode == Enum.KeyCode.RightShift then
+		Frame.Visible = not Frame.Visible
+
+	elseif Input.KeyCode == Enum.KeyCode.F then
+		OptimizeFPS()
+
+	elseif Input.KeyCode == Enum.KeyCode.Z then
+		ToggleSpeed()
+
+	elseif Input.KeyCode == Enum.KeyCode.X then
+		Teleport()
+	end
+end)
+
+--------------------------------------------------
+-- DRAGGING
+--------------------------------------------------
+
+local Dragging = false
+local DragStart
+local StartPos
+
+Frame.InputBegan:Connect(function(Input)
+	if Input.UserInputType == Enum.UserInputType.MouseButton1
+	or Input.UserInputType == Enum.UserInputType.Touch then
+
+		Dragging = true
+		DragStart = Input.Position
+		StartPos = Frame.Position
+	end
+end)
+
+UIS.InputEnded:Connect(function(Input)
+	if Input.UserInputType == Enum.UserInputType.MouseButton1
+	or Input.UserInputType == Enum.UserInputType.Touch then
+		Dragging = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(Input)
+	if Dragging and (
+		Input.UserInputType == Enum.UserInputType.MouseMovement
+		or Input.UserInputType == Enum.UserInputType.Touch
+	) then
+
+		local Delta = Input.Position - DragStart
+
+		Frame.Position = UDim2.new(
+			StartPos.X.Scale,
+			StartPos.X.Offset + Delta.X,
+			StartPos.Y.Scale,
+			StartPos.Y.Offset + Delta.Y
+		)
+	end
+end)
